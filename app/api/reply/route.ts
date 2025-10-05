@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 const PROVIDER = (process.env.PROVIDER || 'groq').toLowerCase();
@@ -33,10 +33,10 @@ const detectCrisis = (t: string) => CRISIS_PATTERNS.some((re)=>re.test(t));
 function crisisResources(country?: string) {
   const c = (country || "US").toUpperCase();
   switch (c) {
-    case "CA": return { headline: "If you’re in immediate danger, call 911.", line: "Talk Suicide Canada: 1-833-456-4566 (24/7) or text 45645.", web: "https://talksuicide.ca/" };
-    case "GB": case "UK": return { headline: "If you’re in immediate danger, call 999.", line: "Samaritans: 116 123 (free, 24/7).", web: "https://www.samaritans.org/" };
-    case "AU": return { headline: "If you’re in immediate danger, call 000.", line: "Lifeline: 13 11 14 (24/7).", web: "https://www.lifeline.org.au/" };
-    default: return { headline: "If you’re in immediate danger, call your local emergency number.", line: "U.S. 988 Suicide & Crisis Lifeline: call or text 988 (24/7).", web: "https://988lifeline.org/" };
+    case "CA": return { headline: "If you鈥檙e in immediate danger, call 911.", line: "Talk Suicide Canada: 1-833-456-4566 (24/7) or text 45645.", web: "https://talksuicide.ca/" };
+    case "GB": case "UK": return { headline: "If you鈥檙e in immediate danger, call 999.", line: "Samaritans: 116 123 (free, 24/7).", web: "https://www.samaritans.org/" };
+    case "AU": return { headline: "If you鈥檙e in immediate danger, call 000.", line: "Lifeline: 13 11 14 (24/7).", web: "https://www.lifeline.org.au/" };
+    default: return { headline: "If you鈥檙e in immediate danger, call your local emergency number.", line: "U.S. 988 Suicide & Crisis Lifeline: call or text 988 (24/7).", web: "https://988lifeline.org/" };
   }
 }
 
@@ -44,21 +44,21 @@ export async function POST(req: NextRequest) {
   const country = req.headers.get("x-vercel-ip-country") || undefined;
   const { userText, modality, lang } = BodySchema.parse(await req.json());
 
-  // Safety gate �?block LLM calls if crisis detected
+  // Safety gate 鈥?block LLM calls if crisis detected
   if (detectCrisis(userText)) {
     const help = crisisResources(country);
     return NextResponse.json({
       type: 'crisis',
       message: lang==='zh'
-        ? '很高兴你愿意说出来。你描述的情况听起来很紧急。我不能提供紧急援助，但下面是可以立即支持你的资源�?
-        : 'I’m really glad you reached out. What you’re describing sounds urgent. I can’t provide emergency help, but here are resources that can support you right now.',
+        ? '寰堥珮鍏翠綘鎰挎剰璇村嚭鏉ャ€備綘鎻忚堪鐨勬儏鍐靛惉璧锋潵寰堢揣鎬ャ€傛垜涓嶈兘鎻愪緵绱ф€ユ彺鍔╋紝浣嗕笅闈㈡槸鍙互绔嬪嵆鏀寔浣犵殑璧勬簮銆?
+        : 'I鈥檓 really glad you reached out. What you鈥檙e describing sounds urgent. I can鈥檛 provide emergency help, but here are resources that can support you right now.',
       resources: help
     }, { status: 200 });
   }
 
   const system = `${lang==='zh' ? 'Respond in Simplified Chinese.' : 'Respond in English.'}
 ${MODALITY_SYSTEMS[modality]}
-Rules: Do not claim to diagnose or provide treatment. Encourage professional therapy. Use 80�?40 words. End with 1 concise question that helps the user continue.`;
+Rules: Do not claim to diagnose or provide treatment. Encourage professional therapy. Use 80鈥?40 words. End with 1 concise question that helps the user continue.`;
 
   if (PROVIDER === 'groq') {
     if (!GROQ_API_KEY) return new NextResponse('Missing GROQ_API_KEY', { status: 500 });
@@ -133,3 +133,4 @@ Rules: Do not claim to diagnose or provide treatment. Encourage professional the
 
   return new NextResponse('Unsupported PROVIDER', { status: 500 });
 }
+

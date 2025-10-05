@@ -1,4 +1,4 @@
-export const metadata = {
+﻿export const metadata = {
   title: "Credibot",
   description: "Therapy-style conversation prep tool",
 };
@@ -14,3 +14,4 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
+
