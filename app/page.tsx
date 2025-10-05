@@ -176,5 +176,115 @@ export default function Page() {
     doc.save("credibot-intake.pdf");
   }
 
-  return <div>Placeholder</div>;
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white text-slate-900">
+      {/* Header */}
+      <header className="sticky top-0 z-10 backdrop-blur bg-white/70 border-b border-slate-200">
+        <div className="mx-auto max-w-3xl px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-600">{lang === "zh" ? "会话风格" : "Active style"}:</span>
+            <span className={`text-xs font-medium px-2 py-1 rounded-full ${MODALITIES.find(m => m.key === active)!.color}`}>
+              {activeLabel}
+            </span>
+            <button onClick={changeModality} className="text-xs underline">
+              {lang === "zh" ? "切换风格" : "Change modality"}
+            </button>
+          </div>
+          <nav className="flex items-center gap-4 text-xs">
+            <a className="underline" href="/find">
+              {lang === "zh" ? "找治疗师" : "Find Therapists"}
+            </a>
+            <label className="flex items-center gap-1">
+              <span>{lang === "zh" ? "语言" : "Language"}:</span>
+              <select
+                value={lang}
+                onChange={e => setLang(e.target.value as any)}
+                className="border rounded px-2 py-0.5"
+              >
+                <option value="en">English</option>
+                <option value="zh">中文</option>
+              </select>
+            </label>
+            <button onClick={startOver} className="underline" disabled={isStreaming}>
+              {lang === "zh" ? "重新开始" : "Start over"}
+            </button>
+          </nav>
+        </div>
+      </header>
+
+      {/* Crisis banner */}
+      <div className="mx-auto max-w-3xl px-4 mt-4">
+        <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm">
+          <strong>{lang === "zh" ? "安全优先：" : "Safety first:"}</strong>{" "}
+          {lang === "zh"
+            ? "如果你处于紧急危险或有伤害自己的想法，请拨打当地紧急电话，或在美国拨打 988。"
+            : "If you’re in immediate danger or thinking about harming yourself, call your local emergency number or 988 (U.S.)."}
+        </div>
+      </div>
+
+      {/* Chat window */}
+      <main className="mx-auto max-w-3xl px-4 mt-4">
+        <div
+          ref={scroller}
+          className="h-[56vh] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+        >
+          {messages.map((m, i) => (
+            <div key={i} className={`mb-4 flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+              <div
+                className={`max-w-[80%] rounded-2xl px-4 py-3 shadow-sm ${{
+                  true: "bg-indigo-600 text-white",
+                  false: "bg-slate-100 text-slate-900",
+                }[String(m.role === "user")]}`}
+              >
+                <p className="whitespace-pre-wrap leading-relaxed">{m.text}</p>
+                {m.role === "bot" && m.modality && (
+                  <div className="mt-2 text-xs text-slate-600">
+                    {lang === "zh" ? "风格：" : "Style:"} {MODALITIES.find(x => x.key === m.modality)?.short}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Input row */}
+        <div className="mt-3 flex items-start gap-2">
+          <textarea
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                onSubmit();
+              }
+            }}
+            placeholder={
+              lang === "zh"
+                ? "想说什么都可以…（按 Enter 发送，Shift+Enter 换行）"
+                : "Share what’s on your mind… (press Enter to send, Shift+Enter for a new line)"
+            }
+            className="flex-1 resize-none h-24 rounded-xl border border-slate-300 bg-white p-3 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+          />
+          <div className="flex flex-col gap-2">
+            <button
+              onClick={onSubmit}
+              disabled={isStreaming}
+              className="rounded-xl bg-indigo-600 px-4 py-2 text-white font-semibold shadow hover:bg-indigo-700 disabled:opacity-50"
+            >
+              {isStreaming ? (lang === "zh" ? "生成中…" : "Thinking…") : lang === "zh" ? "发送" : "Send"}
+            </button>
+            <button onClick={exportIntakePDF} className="rounded-xl border px-4 py-2 text-sm">
+              {lang === "zh" ? "导出 Intake PDF" : "Export intake PDF"}
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-6 text-xs text-slate-600">
+          {lang === "zh"
+            ? "继续使用表示你理解：这是教育性准备工具，不构成诊断或治疗；临床需要请寻求专业帮助。"
+            : "By continuing, you agree this is educational prep—not diagnosis or treatment—and you’ll seek professional care for clinical needs."}
+        </div>
+      </main>
+    </div>
+  );
 }
