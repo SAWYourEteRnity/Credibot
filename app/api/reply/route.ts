@@ -83,10 +83,8 @@ export async function POST(req: NextRequest) {
               if (data === "[DONE]") continue;
               try {
                 const json = JSON.parse(data);
-                const delta: string =
-                  json?.choices?.[0]?.delta?.content ??
-                  json?.choices?.[0]?.delta ??
-                  "";
+                const d = json?.choices?.[0]?.delta;
+                const delta = typeof d?.content === "string" ? d.content : "";
                 if (delta) controller.enqueue(encoder.encode(delta));
               } catch {}
             }
