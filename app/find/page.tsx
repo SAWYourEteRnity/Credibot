@@ -1,172 +1,180 @@
 "use client";
-import React from "react";
+import React, { useMemo, useRef, useState } from "react";
+import { jsPDF } from "jspdf";
 
-const MODALITIES = ["CBT","DBT","ACT","Psychodynamic","Person-Centered","Emotion-Focused","Solution-Focused"] as const;
-const SPECIALTIES = ["Anxiety","Depression","Trauma/PTSD","ADHD","Grief","Couples","Family","LGBTQ+ Affirming"] as const;
-const LANGS = ["English","中文","Spanish","Hindi","Tagalog","Vietnamese","French","Arabic","Korean","Russian"] as const;
+/**
+ * Credibot - Main Chat Page (Next.js App Router)
+ * - Streaming from /api/reply
+ * - Language toggle (English / 中文)
+ * - Change modality (PCT, EFT, CBT, DBT, SFBT, Psychodynamic, ACT)
+ * - Enter to send (Shift+Enter for newline)
+ * - Export Intake PDF
+ * - Find Therapists link (/find)
+ */
 
-function buildTerms({ city, telehealth, insurance, maxFee, modalities, specialties, language }: any) {
-  const parts: string[] = [];
-  if (city) parts.push(city);
-  if (telehealth) parts.push("telehealth");
-  if (insurance) parts.push(`insurance ${insurance}`);
-  if (maxFee) parts.push(`fee <= ${maxFee}`);
-  if (modalities?.length) parts.push(modalities.join(" "));
-  if (specialties?.length) parts.push(specialties.join(" "));
-  if (language) parts.push(language);
-  return parts.filter(Boolean).join(" ");
-}
-function openGoogleSite(domain: string, query: string) {
-  const url = `https://www.google.com/search?q=${encodeURIComponent(`site:${domain} therapist ${query}`)}`;
-  window.open(url, "_blank");
-}
+const MODALITIES = [
+  { key: "pct", name: "Person-Centered (PCT)", short: "Person-Centered", color: "bg-blue-100 text-blue-700" },
+  { key: "eft", name: "Emotion-Focused (EFT)", short: "Emotion-Focused", color: "bg-pink-100 text-pink-700" },
+  { key: "cbt", name: "Cognitive Behavioral (CBT)", short: "CBT", color: "bg-amber-100 text-amber-800" },
+  { key: "dbt", name: "Dialectical Behavior (DBT)", short: "DBT", color: "bg-violet-100 text-violet-800" },
+  { key: "sfbt", name: "Solution-Focused (SFBT)", short: "Solution-Focused", color: "bg-emerald-100 text-emerald-800" },
+  { key: "psychodynamic", name: "Psychodynamic", short: "Psychodynamic", color: "bg-slate-100 text-slate-800" },
+  { key: "act", name: "Acceptance & Commitment (ACT)", short: "ACT", color: "bg-teal-100 text-teal-800" },
+] as const;
 
-export default function FindPage() {
-  const [lang, setLang] = React.useState<'en'|'zh'>(() => {
-    try { return (JSON.parse(localStorage.getItem('pref.lang') || '"en"')) as 'en'|'zh'; } catch { return 'en'; }
-  });
-  React.useEffect(() => { try { localStorage.setItem('pref.lang', JSON.stringify(lang)); } catch {} }, [lang]);
+type ModKey = (typeof MODALITIES)[number]["key"];
+type ChatMsg = { role: "user" | "bot"; text: string; modality?: ModKey };
 
-  const [city, setCity] = React.useState("");
-  const [telehealth, setTelehealth] = React.useState(true);
-  const [insurance, setInsurance] = React.useState("");
-  const [maxFee, setMaxFee] = React.useState<number | "">("");
-  const [modalities, setModalities] = React.useState<string[]>([]);
-  const [specialties, setSpecialties] = React.useState<string[]>([]);
-  const [language, setLanguage] = React.useState("");
+const INITIAL_BOT_MESSAGE: ChatMsg = {
+  role: "bot",
+  text:
+    "Hi there—I'm Credibot. I can help you get ready for therapy: understand different conversational styles, clarify your preferences, and sketch next steps. If this is an emergency, call your local crisis line or 988 in the U.S.",
+};
 
-  const toggle = (setter: any, arr: string[], item: string) => setter(arr.includes(item) ? arr.filter(x => x !== item) : [...arr, item]);
+export default function Page() {
+  const [messages, setMessages] = useState<ChatMsg[]>([INITIAL_BOT_MESSAGE]);
+  const [input, setInput] = useState("");
+  const [active, setActive] = useState<ModKey>("pct");
+  const [lang, setLang] = useState<"en" | "zh">("en");
+  const [isStreaming, setIsStreaming] = useState(false);
+  const abortRef = useRef<AbortController | null>(null);
+  const scroller = useRef<HTMLDivElement | null>(null);
 
-  const launch = (domain: string) => {
-    const terms = buildTerms({ city, telehealth, insurance, maxFee, modalities, specialties, language });
-    openGoogleSite(domain, terms);
-  };
-
-  const copyOutreach = () => {
-    const body =
-      lang === 'zh'
-        ? `你好，
-
-  我正在寻找心理治疗，你的资料看起来可能比较匹配。以下是来自 Credibot（一个治疗准备工具）的简要信息：
-  - 所在地：${city || "(你的城市)"}
-  - 会谈偏好：${telehealth ? "远程" : "面谈"}
-  - 保险：${insurance || "自费 / 待定"}
-  - 预算：${maxFee ? `不超过 $${maxFee}` : "弹性"}
-  - 可能偏好的取向：${modalities.join(", ") || "待定"}
-  - 关注领域：${specialties.join(", ") || "待定"}
-  - 语言：${language || "中文/英语"}
-
-  如果你正在接收新来访者，能否告知初次咨询的可预约时间和通常费用？
-
-  谢谢！`
-        : `Hello,
-
-  I’m exploring therapy and your profile looks like a potential fit. A quick snapshot about me from Credibot (a therapy-prep tool):
-  - Location: ${city || "(your city)"}
-  - Session preference: ${telehealth ? "Telehealth" : "In-person"}
-  - Insurance: ${insurance || "Self-pay / TBD"}
-  - Budget: ${maxFee ? `Up to $${maxFee}` : "Flexible"}
-  - Modalities I think I might like: ${modalities.join(", ") || "TBD"}
-  - Focus areas: ${specialties.join(", ") || "TBD"}
-  - Language: ${language || "English"}
-
-  If you’re taking new clients, could you share openings for an initial consultation and typical fees?
-
-  Thank you!`;
-
-    navigator.clipboard.writeText(body);
-    alert(lang === 'zh' ? '已复制联络邮件。' : 'Outreach note copied to clipboard.');
-  };
-  
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white text-slate-900">
-      <header className="sticky top-0 z-10 backdrop-blur bg-white/70 border-b border-slate-200">
-        <div className="mx-auto max-w-3xl px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <a href="/" className="h-8 w-8 rounded-xl bg-indigo-600 text-white grid place-items-center font-bold">C</a>
-            <div>
-              <div className="font-semibold">{lang==='zh' ? '找咨询师' : 'Find Therapists'}</div>
-              <div className="text-xs text-slate-600">{lang==='zh' ? '构建筛选 → 打开可信的目录' : 'Build filters → open trusted directories'}</div>
-            </div>
-          </div>
-          <nav className="flex items-center gap-4 text-sm">
-            <a className="underline" href="/">{lang==='zh' ? '返回聊天' : 'Back to Chat'}</a>
-            <div className="flex items-center gap-2">
-              <label className="text-xs text-slate-600">{lang==='zh' ? '语言' : 'Language'}:</label>
-              <select value={lang} onChange={(e)=>setLang(e.target.value as any)} className="text-xs border rounded-md px-2 py-1">
-                <option value="en">English</option>
-                <option value="zh">中文</option>
-              </select>
-            </div>
-          </nav>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-3xl px-4 mt-4">
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm">
-          <strong>{lang==='zh' ? '提示：' : 'Note:'}</strong> {lang==='zh' ? '这些搜索会在新标签打开公共目录网站，你将根据筛选条件查看资料并直接联系治疗师。' : 'These searches open public directories in new tabs using your filters. You鈥檒l review profiles and contact clinicians directly.'}
-        </div>
-
-        <div className="mt-4 grid gap-4">
-          <div className="rounded-2xl border border-slate-200 bg-white p-4">
-            <div className="grid md:grid-cols-2 gap-3">
-              <label className="text-sm">{lang==='zh' ? '城市/地区' : 'City/Region'}
-                <input value={city} onChange={e=>setCity(e.target.value)} placeholder={lang==='zh' ? '例如：Seattle, WA 或 Vancouver, BC' : 'e.g., Seattle WA or Vancouver BC'} className="mt-1 w-full border rounded-lg px-3 py-2" />
-              </label>
-              <label className="text-sm">{lang==='zh' ? '保险（可选）' : 'Insurance (optional)'}
-                <input value={insurance} onChange={e=>setInsurance(e.target.value)} placeholder={lang==='zh' ? '例如：Aetna, Premera, Kaiser' : 'e.g., Aetna, Premera, Kaiser'} className="mt-1 w-full border rounded-lg px-3 py-2" />
-              </label>
-              <label className="text-sm">{lang==='zh' ? '最高费用（可选）' : 'Max Fee (optional)'}
-                <input type="number" value={maxFee as any} onChange={e=>setMaxFee(e.target.value? Number(e.target.value) : "")} placeholder={lang==='zh' ? '例如：150' : 'e.g., 150'} className="mt-1 w-full border rounded-lg px-3 py-2" />
-              </label>
-              <label className="text-sm flex items-center gap-2 mt-5 md:mt-0">
-                <input type="checkbox" checked={telehealth} onChange={e=>setTelehealth(e.target.checked)} /> {lang==='zh' ? '优先远程诊疗' : 'Prefer Telehealth'}
-              </label>
-            </div>
-
-            <div className="mt-4">
-              <div className="text-sm font-medium">{lang==='zh' ? '治疗取向' : 'Modalities'}</div>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {MODALITIES.map(m => (
-                  <button key={m} onClick={()=>toggle(setModalities, modalities, m)} className={`text-xs px-2 py-1 rounded-full border ${modalities.includes(m) ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-700 border-slate-300'}`}>{m}</button>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-4">
-              <div className="text-sm font-medium">{lang==='zh' ? '专长领域' : 'Specialties'}</div>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {SPECIALTIES.map(s => (
-                  <button key={s} onClick={()=>toggle(setSpecialties, specialties, s)} className={`text-xs px-2 py-1 rounded-full border ${specialties.includes(s) ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-700 border-slate-300'}`}>{s}</button>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-4 grid md:grid-cols-2 gap-3">
-              <label className="text-sm">{lang==='zh' ? '语言' : 'Language'}
-                <select value={language} onChange={e=>setLanguage(e.target.value)} className="mt-1 w-full border rounded-lg px-3 py-2">
-                  <option value="">{lang==='zh' ? '选择...' : 'Select...'}</option>
-                  {LANGS.map(l => <option key={l} value={l}>{l}</option>)}
-                </select>
-              </label>
-            </div>
-
-            <div className="mt-4 grid md:grid-cols-2 gap-3">
-              <button onClick={() => launch("psychologytoday.com")} className="rounded-lg border px-3 py-2 text-sm hover:bg-slate-50">{lang==='zh' ? '搜索 Psychology Today' : 'Search Psychology Today'}</button>
-              <button onClick={() => launch("therapyden.com")} className="rounded-lg border px-3 py-2 text-sm hover:bg-slate-50">{lang==='zh' ? '搜索 TherapyDen' : 'Search TherapyDen'}</button>
-              <button onClick={() => launch("inclusivetherapists.com")} className="rounded-lg border px-3 py-2 text-sm hover:bg-slate-50">{lang==='zh' ? '搜索 Inclusive Therapists' : 'Search Inclusive Therapists'}</button>
-              <button onClick={() => launch("openpathcollective.org")} className="rounded-lg border px-3 py-2 text-sm hover:bg-slate-50">{lang==='zh' ? '搜索 Open Path（低费用）' : 'Search Open Path (lower-cost)'}</button>
-              <button onClick={() => launch("zencare.co")} className="rounded-lg border px-3 py-2 text-sm hover:bg-slate-50">{lang==='zh' ? '搜索 Zencare' : 'Search Zencare'}</button>
-            </div>
-
-            <div className="mt-4 flex items-center gap-3 text-sm">
-              <button onClick={copyOutreach} className="underline">{lang==='zh' ? '复制联络邮件' : 'Copy outreach email'}</button>
-              <a href="/" className="underline">{lang==='zh' ? '返回聊天' : 'Back to Chat'}</a>
-            </div>
-          </div>
-        </div>
-      </main>
-    </div>
+  const activeLabel = useMemo(
+    () => MODALITIES.find(m => m.key === active)?.short || "Person-Centered",
+    [active]
   );
-}
 
+  const startOver = () => {
+    abortRef.current?.abort();
+    setIsStreaming(false);
+    setMessages([INITIAL_BOT_MESSAGE]);
+    setInput("");
+  };
+
+  async function send(text: string, modality: ModKey) {
+    if (!text.trim() || isStreaming) return;
+
+    setMessages(m => [...m, { role: "user", text }]);
+    const botIndex = messages.length + 1; // index after user message
+    setMessages(m => [...m, { role: "bot", text: "", modality }]);
+
+    const ac = new AbortController();
+    abortRef.current = ac;
+    setIsStreaming(true);
+
+    try {
+      const res = await fetch("/api/reply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userText: text, modality, lang }),
+        signal: ac.signal,
+      });
+      if (!res.ok) throw new Error(await res.text());
+      if (!res.body) throw new Error("No response body");
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value);
+        setMessages(m => {
+          const copy = [...m];
+          const msg = copy[botIndex];
+          if (msg && msg.role === "bot") msg.text += chunk;
+          return copy;
+        });
+        scroller.current?.scrollTo({ top: scroller.current.scrollHeight, behavior: "smooth" });
+      }
+    } catch {
+      setMessages(m => {
+        const copy = [...m];
+        const msg = copy[botIndex];
+        if (msg && msg.role === "bot") {
+          msg.text = msg.text || (lang === "zh" ? "网络错误，请重试。" : "Network error. Please try again.");
+        }
+        return copy;
+      });
+    } finally {
+      setIsStreaming(false);
+      abortRef.current = null;
+    }
+  }
+
+  function onSubmit() {
+    const t = input.trim();
+    if (!t) return;
+    setInput("");
+    send(t, active);
+  }
+
+  function changeModality() {
+    const lastUser = [...messages].reverse().find(m => m.role === "user")?.text;
+    if (!lastUser || isStreaming) return;
+    const i = MODALITIES.findIndex(m => m.key === active);
+    const next = MODALITIES[(i + 1) % MODALITIES.length].key;
+    setActive(next);
+    send(lastUser, next);
+  }
+
+  function exportIntakePDF() {
+    const doc = new jsPDF({ unit: "pt", format: "letter" });
+    const margin = 56;
+    let y = margin;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const maxWidth = pageWidth - margin * 2;
+
+    const H = (txt: string) => {
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(18);
+      doc.text(txt, margin, y);
+      y += 22;
+    };
+    const P = (txt: string) => {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(12);
+      const lines = doc.splitTextToSize(txt, maxWidth);
+      for (const line of lines) {
+        if (y > 740) {
+          doc.addPage();
+          y = margin;
+        }
+        doc.text(line, margin, y);
+        y += 16;
+      }
+      y += 6;
+    };
+    const t = (en: string, zh: string) => (lang === "zh" ? zh : en);
+
+    H(t("Credibot - Therapy Intake Snapshot", "Credibot - 治疗准备摘要"));
+    P(new Date().toLocaleString());
+
+    H(t("Active Style", "当前风格"));
+    P(MODALITIES.find(m => m.key === active)?.name || "Person-Centered (PCT)");
+
+    H(t("Recent Conversation (excerpt)", "最近对话（节选）"));
+    const recent = messages.slice(-12);
+    const convo = recent
+      .map(m => {
+        const who = m.role === "user" ? t("Client", "来访者") : "Credibot";
+        const tag = m.modality ? ` [${MODALITIES.find(x => x.key === m.modality)?.short}]` : "";
+        return `${who}${tag}: ${m.text}`;
+      })
+      .join("\n\n");
+    P(convo || t("No messages yet.", "暂无对话。"));
+
+    H(t("Notes and Boundaries", "说明与边界"));
+    P(
+      t(
+        "This document is for preparation and discussion with a licensed clinician. It is not diagnosis or treatment. If you are in crisis, contact your local emergency number or 988 in the U.S.",
+        "本文件用于与持证临床医生进行准备与沟通，不构成诊断或治疗。如果你处于危机中，请联系当地紧急电话（在美国拨打 988）。"
+      )
+    );
+
+    doc.save("credibot-intake.pdf");
+  }
+
+  return <div>Placeholder</div>;
+}
