@@ -119,14 +119,6 @@ export default function Page() {
     send(lastUser, next);
   }
 
-  function selectModality(newKey: ModKey) {
-    setActive(newKey);
-    // If we have a last user message, auto-reply in the newly selected modality
-    const lastUser = [...messages].reverse().find(m => m.role === "user")?.text;
-    if (!lastUser || isStreaming) return;
-    send(lastUser, newKey);
-  }
-
   function exportIntakePDF() {
     const doc = new jsPDF({ unit: "pt", format: "letter" });
     const margin = 56;
@@ -194,16 +186,9 @@ export default function Page() {
             <span className={`text-xs font-medium px-2 py-1 rounded-full ${MODALITIES.find(m => m.key === active)!.color}`}>
               {activeLabel}
             </span>
-	    <select
-              value={active}
-              onChange={(e) => selectModality(e.target.value as ModKey)}
-              className="text-xs border rounded px-2 py-1 bg-white"
-              title={lang === "zh" ? "选择会话风格" : "Select a modality"}
-            >
-              {MODALITIES.map(m => (
-                <option key={m.key} value={m.key}>{m.name}</option>
-              ))}
-            </select>
+            <button onClick={changeModality} className="text-xs underline">
+              {lang === "zh" ? "切换风格" : "Change modality"}
+            </button>
           </div>
           <nav className="flex items-center gap-4 text-xs">
             <a className="underline" href="/find">
