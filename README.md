@@ -1,4 +1,4 @@
-﻿# Credibot (Next.js 14, Groq streaming)
+# Credibot (Next.js 14, Groq streaming)
 Therapy-style conversation prep tool with bilingual UI, streaming LLM replies (Groq), Find-Therapist helper, and one-click Intake PDF export.
 
 ## Quick start

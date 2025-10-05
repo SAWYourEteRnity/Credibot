@@ -1,2 +1,2 @@
-﻿export default {};
+export default {};
 

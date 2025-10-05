@@ -1,4 +1,4 @@
-﻿export const metadata = {
+export const metadata = {
   title: "Credibot",
   description: "Therapy-style conversation prep tool",
 };

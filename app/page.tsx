@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import React, { useMemo, useRef, useState } from "react";
 import { jsPDF } from "jspdf";
 

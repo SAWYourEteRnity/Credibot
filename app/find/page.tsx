@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import React from "react";
 
 const MODALITIES = ["CBT","DBT","ACT","Psychodynamic","Person-Centered","Emotion-Focused","Solution-Focused"] as const;
