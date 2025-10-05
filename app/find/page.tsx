@@ -1,4 +1,3 @@
-\
 "use client";
 import React from "react";
 
@@ -45,10 +44,10 @@ export default function FindPage() {
 
   const copyOutreach = () => {
     const body = lang==='zh'
-      ? `你好，\n\n我正在寻找心理治疗，你的资料看起来可能比较匹配。以下是来自 Credibot（一个治疗准备工具）的简要信息：\n- 所在地：${city || "(你的城市)"}\n- 会谈偏好：${telehealth ? "远程" : "面谈"}\n- 保险：${insurance || "自费 / 待定"}\n- 预算：${maxFee ? `不超过 $${maxFee}` : "弹性"}\n- 可能偏好的取向：${modalities.join(", ") || "待定"}\n- 关注领域：${specialties.join(", ") || "待定"}\n- 语言：${language || "中文/英语"}\n\n如果你正在接收新来访者，能否告知初次咨询的可预约时间和通常费用？\n\n谢谢！`
+      ? `你好，\n\n我正在寻找心理治疗，你的资料看起来可能比较匹配。以下是来自 Credibot（一个治疗准备工具）的简要信息：\n- 所在地�?{city || "(你的城市)"}\n- 会谈偏好�?{telehealth ? "远程" : "面谈"}\n- 保险�?{insurance || "自费 / 待定"}\n- 预算�?{maxFee ? `不超�?$${maxFee}` : "弹�?}\n- 可能偏好的取向：${modalities.join(", ") || "待定"}\n- 关注领域�?{specialties.join(", ") || "待定"}\n- 语言�?{language || "中文/英语"}\n\n如果你正在接收新来访者，能否告知初次咨询的可预约时间和通常费用？\n\n谢谢！`
       : `Hello,\n\nI’m exploring therapy and your profile looks like a potential fit. A quick snapshot about me from Credibot (a therapy-prep tool):\n- Location: ${city || "(your city)"}\n- Session preference: ${telehealth ? "Telehealth" : "In-person"}\n- Insurance: ${insurance || "Self-pay / TBD"}\n- Budget: ${maxFee ? `Up to $${maxFee}` : "Flexible"}\n- Modalities I think I might like: ${modalities.join(", ") || "TBD"}\n- Focus areas: ${specialties.join(", ") || "TBD"}\n- Language: ${language || "English"}\n\nIf you’re taking new clients, could you share openings for an initial consultation and typical fees?\n\nThank you!`;
     navigator.clipboard.writeText(body);
-    alert(lang==='zh' ? '已复制联络邮件。' : 'Outreach note copied to clipboard.');
+    alert(lang==='zh' ? '已复制联络邮件�? : 'Outreach note copied to clipboard.');
   };
 
   return (
@@ -59,7 +58,7 @@ export default function FindPage() {
             <a href="/" className="h-8 w-8 rounded-xl bg-indigo-600 text-white grid place-items-center font-bold">C</a>
             <div>
               <div className="font-semibold">{lang==='zh' ? '找治疗师' : 'Find Therapists'}</div>
-              <div className="text-xs text-slate-600">{lang==='zh' ? '构建筛选 → 打开可信的目录' : 'Build filters → open trusted directories'}</div>
+              <div className="text-xs text-slate-600">{lang==='zh' ? '构建筛�?�?打开可信的目�? : 'Build filters �?open trusted directories'}</div>
             </div>
           </div>
           <nav className="flex items-center gap-4 text-sm">
@@ -77,20 +76,20 @@ export default function FindPage() {
 
       <main className="mx-auto max-w-3xl px-4 mt-4">
         <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm">
-          <strong>{lang==='zh' ? '提示：' : 'Note:'}</strong> {lang==='zh' ? '这些搜索会在新标签打开公共目录网站，你将根据筛选条件查看资料并直接联系治疗师。' : 'These searches open public directories in new tabs using your filters. You’ll review profiles and contact clinicians directly.'}
+          <strong>{lang==='zh' ? '提示�? : 'Note:'}</strong> {lang==='zh' ? '这些搜索会在新标签打开公共目录网站，你将根据筛选条件查看资料并直接联系治疗师�? : 'These searches open public directories in new tabs using your filters. You’ll review profiles and contact clinicians directly.'}
         </div>
 
         <div className="mt-4 grid gap-4">
           <div className="rounded-2xl border border-slate-200 bg-white p-4">
             <div className="grid md:grid-cols-2 gap-3">
               <label className="text-sm">{lang==='zh' ? '城市/地区' : 'City/Region'}
-                <input value={city} onChange={e=>setCity(e.target.value)} placeholder={lang==='zh' ? '例如：Seattle, WA 或 Vancouver, BC' : 'e.g., Seattle WA or Vancouver BC'} className="mt-1 w-full border rounded-lg px-3 py-2" />
+                <input value={city} onChange={e=>setCity(e.target.value)} placeholder={lang==='zh' ? '例如：Seattle, WA �?Vancouver, BC' : 'e.g., Seattle WA or Vancouver BC'} className="mt-1 w-full border rounded-lg px-3 py-2" />
               </label>
               <label className="text-sm">{lang==='zh' ? '保险（可选）' : 'Insurance (optional)'}
                 <input value={insurance} onChange={e=>setInsurance(e.target.value)} placeholder={lang==='zh' ? '例如：Aetna, Premera, Kaiser' : 'e.g., Aetna, Premera, Kaiser'} className="mt-1 w-full border rounded-lg px-3 py-2" />
               </label>
               <label className="text-sm">{lang==='zh' ? '最高费用（可选）' : 'Max Fee (optional)'}
-                <input type="number" value={maxFee as any} onChange={e=>setMaxFee(e.target.value? Number(e.target.value) : "")} placeholder={lang==='zh' ? '例如：150' : 'e.g., 150'} className="mt-1 w-full border rounded-lg px-3 py-2" />
+                <input type="number" value={maxFee as any} onChange={e=>setMaxFee(e.target.value? Number(e.target.value) : "")} placeholder={lang==='zh' ? '例如�?50' : 'e.g., 150'} className="mt-1 w-full border rounded-lg px-3 py-2" />
               </label>
               <label className="text-sm flex items-center gap-2 mt-5 md:mt-0">
                 <input type="checkbox" checked={telehealth} onChange={e=>setTelehealth(e.target.checked)} /> {lang==='zh' ? '优先远程诊疗' : 'Prefer Telehealth'}
@@ -118,7 +117,7 @@ export default function FindPage() {
             <div className="mt-4 grid md:grid-cols-2 gap-3">
               <label className="text-sm">{lang==='zh' ? '语言' : 'Language'}
                 <select value={language} onChange={e=>setLanguage(e.target.value)} className="mt-1 w-full border rounded-lg px-3 py-2">
-                  <option value="">{lang==='zh' ? '选择…' : 'Select…'}</option>
+                  <option value="">{lang==='zh' ? '选择�? : 'Select�?}</option>
                   {LANGS.map(l => <option key={l} value={l}>{l}</option>)}
                 </select>
               </label>
@@ -128,7 +127,7 @@ export default function FindPage() {
               <button onClick={() => launch("psychologytoday.com")} className="rounded-lg border px-3 py-2 text-sm hover:bg-slate-50">{lang==='zh' ? '搜索 Psychology Today' : 'Search Psychology Today'}</button>
               <button onClick={() => launch("therapyden.com")} className="rounded-lg border px-3 py-2 text-sm hover:bg-slate-50">{lang==='zh' ? '搜索 TherapyDen' : 'Search TherapyDen'}</button>
               <button onClick={() => launch("inclusivetherapists.com")} className="rounded-lg border px-3 py-2 text-sm hover:bg-slate-50">{lang==='zh' ? '搜索 Inclusive Therapists' : 'Search Inclusive Therapists'}</button>
-              <button onClick={() => launch("openpathcollective.org")} className="rounded-lg border px-3 py-2 text-sm hover:bg-slate-50">{lang==='zh' ? '搜索 Open Path（低费用）' : 'Search Open Path (lower-cost)'}</button>
+              <button onClick={() => launch("openpathcollective.org")} className="rounded-lg border px-3 py-2 text-sm hover:bg-slate-50">{lang==='zh' ? '搜索 Open Path（低费用�? : 'Search Open Path (lower-cost)'}</button>
               <button onClick={() => launch("zencare.co")} className="rounded-lg border px-3 py-2 text-sm hover:bg-slate-50">{lang==='zh' ? '搜索 Zencare' : 'Search Zencare'}</button>
             </div>
 

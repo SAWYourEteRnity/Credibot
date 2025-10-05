@@ -1,4 +1,3 @@
-\
 "use client";
 import React, { useMemo, useRef, useState } from "react";
 import { jsPDF } from "jspdf";
@@ -75,7 +74,7 @@ export default function Page() {
       setMessages(m => {
         const copy = [...m];
         const msg = copy[botIndex];
-        if (msg && msg.role === "bot") msg.text = msg.text || (lang === "zh" ? "网络错误，请重试。" : "Network error. Please try again.");
+        if (msg && msg.role === "bot") msg.text = msg.text || (lang === "zh" ? "网络错误，请重试�? : "Network error. Please try again.");
         return copy;
       });
     } finally {
@@ -129,7 +128,7 @@ export default function Page() {
     };
     const t = (en: string, zh: string) => (lang === "zh" ? zh : en);
 
-    H(t("Credibot • Therapy Intake Snapshot", "Credibot • 治疗准备摘要"));
+    H(t("Credibot �?Therapy Intake Snapshot", "Credibot �?治疗准备摘要"));
     P(new Date().toLocaleString());
 
     H(t("Active Style", "当前风格"));
@@ -138,15 +137,15 @@ export default function Page() {
     H(t("Recent Conversation (excerpt)", "最近对话（节选）"));
     const recent = messages.slice(-12);
     const convo = recent
-      .map(m => `${m.role === "user" ? t("Client", "来访者") : "Credibot"}${m.modality ? ` [${MODALITIES.find(x => x.key === m.modality)?.short}]` : ""}: ${m.text}`)
+      .map(m => `${m.role === "user" ? t("Client", "来访�?) : "Credibot"}${m.modality ? ` [${MODALITIES.find(x => x.key === m.modality)?.short}]` : ""}: ${m.text}`)
       .join("\\n\\n");
-    P(convo || t("No messages yet.", "暂无对话。"));
+    P(convo || t("No messages yet.", "暂无对话�?));
 
-    H(t("Notes & Boundaries", "说明与边界"));
+    H(t("Notes & Boundaries", "说明与边�?));
     P(
       t(
         "This document is for preparation and discussion with a licensed clinician. It is not diagnosis or treatment. If you are in crisis, contact your local emergency number or 988 in the U.S.",
-        "本文件用于与持证临床医生进行准备与沟通，不构成诊断或治疗。如果你处于危机中，请联系当地紧急电话（在美国拨打 988）。"
+        "本文件用于与持证临床医生进行准备与沟通，不构成诊断或治疗。如果你处于危机中，请联系当地紧急电话（在美国拨�?988）�?
       )
     );
 
@@ -176,7 +175,7 @@ export default function Page() {
               </select>
             </label>
             <button onClick={startOver} className="underline" disabled={isStreaming}>
-              {lang === "zh" ? "重新开始" : "Start over"}
+              {lang === "zh" ? "重新开�? : "Start over"}
             </button>
           </nav>
         </div>
@@ -184,8 +183,8 @@ export default function Page() {
 
       <main className="mx-auto max-w-3xl px-4 mt-4">
         <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm">
-          <strong>{lang === "zh" ? "安全优先：" : "Safety first:"}</strong>{" "}
-          {lang === "zh" ? "如果你处于紧急危险或有伤害自己的想法，请拨打当地紧急电话，或在美国拨打 988。" : "If you’re in immediate danger or thinking about harming yourself, call your local emergency number or 988 (U.S.)."}
+          <strong>{lang === "zh" ? "安全优先�? : "Safety first:"}</strong>{" "}
+          {lang === "zh" ? "如果你处于紧急危险或有伤害自己的想法，请拨打当地紧急电话，或在美国拨打 988�? : "If you’re in immediate danger or thinking about harming yourself, call your local emergency number or 988 (U.S.)."}
         </div>
 
         <div ref={scroller} className="h-[56vh] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-4 shadow-sm mt-4">
@@ -193,7 +192,7 @@ export default function Page() {
             <div key={i} className={`mb-4 flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
               <div className={`max-w-[80%] rounded-2xl px-4 py-3 shadow-sm ${m.role === "user" ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-900"}`}>
                 <p className="whitespace-pre-wrap leading-relaxed">{m.text}</p>
-                {m.role === "bot" && m.modality && <div className="mt-2 text-xs text-slate-600">{lang === "zh" ? "风格：" : "Style:"} {MODALITIES.find(x => x.key === m.modality)?.short}</div>}
+                {m.role === "bot" && m.modality && <div className="mt-2 text-xs text-slate-600">{lang === "zh" ? "风格�? : "Style:"} {MODALITIES.find(x => x.key === m.modality)?.short}</div>}
               </div>
             </div>
           ))}
@@ -209,19 +208,19 @@ export default function Page() {
                 onSubmit();
               }
             }}
-            placeholder={lang === "zh" ? "想说什么都可以…（按 Enter 发送，Shift+Enter 换行）" : "Share what’s on your mind… (press Enter to send, Shift+Enter for a new line)"}
+            placeholder={lang === "zh" ? "想说什么都可以…（�?Enter 发送，Shift+Enter 换行�? : "Share what’s on your mind�?(press Enter to send, Shift+Enter for a new line)"}
             className="flex-1 resize-none h-24 rounded-xl border border-slate-300 bg-white p-3 focus:outline-none focus:ring-2 focus:ring-indigo-200"
           />
           <div className="flex flex-col gap-2">
             <button onClick={onSubmit} disabled={isStreaming} className="rounded-xl bg-indigo-600 px-4 py-2 text-white font-semibold shadow hover:bg-indigo-700 disabled:opacity-50">
-              {isStreaming ? (lang === "zh" ? "生成中…" : "Thinking…") : lang === "zh" ? "发送" : "Send"}
+              {isStreaming ? (lang === "zh" ? "生成中�? : "Thinking�?) : lang === "zh" ? "发�? : "Send"}
             </button>
             <button onClick={exportIntakePDF} className="rounded-xl border px-4 py-2 text-sm">{lang === "zh" ? "导出 Intake PDF" : "Export intake PDF"}</button>
           </div>
         </div>
 
         <div className="mt-6 text-xs text-slate-600">
-          {lang === "zh" ? "继续使用表示你理解：这是教育性准备工具，不构成诊断或治疗；临床需要请寻求专业帮助。" : "By continuing, you agree this is educational prep—not diagnosis or treatment—and you’ll seek professional care for clinical needs."}
+          {lang === "zh" ? "继续使用表示你理解：这是教育性准备工具，不构成诊断或治疗；临床需要请寻求专业帮助�? : "By continuing, you agree this is educational prep—not diagnosis or treatment—and you’ll seek professional care for clinical needs."}
         </div>
       </main>
     </div>

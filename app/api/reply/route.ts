@@ -1,4 +1,3 @@
-\
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -45,13 +44,13 @@ export async function POST(req: NextRequest) {
   const country = req.headers.get("x-vercel-ip-country") || undefined;
   const { userText, modality, lang } = BodySchema.parse(await req.json());
 
-  // Safety gate — block LLM calls if crisis detected
+  // Safety gate �?block LLM calls if crisis detected
   if (detectCrisis(userText)) {
     const help = crisisResources(country);
     return NextResponse.json({
       type: 'crisis',
       message: lang==='zh'
-        ? '很高兴你愿意说出来。你描述的情况听起来很紧急。我不能提供紧急援助，但下面是可以立即支持你的资源。'
+        ? '很高兴你愿意说出来。你描述的情况听起来很紧急。我不能提供紧急援助，但下面是可以立即支持你的资源�?
         : 'I’m really glad you reached out. What you’re describing sounds urgent. I can’t provide emergency help, but here are resources that can support you right now.',
       resources: help
     }, { status: 200 });
@@ -59,7 +58,7 @@ export async function POST(req: NextRequest) {
 
   const system = `${lang==='zh' ? 'Respond in Simplified Chinese.' : 'Respond in English.'}
 ${MODALITY_SYSTEMS[modality]}
-Rules: Do not claim to diagnose or provide treatment. Encourage professional therapy. Use 80–140 words. End with 1 concise question that helps the user continue.`;
+Rules: Do not claim to diagnose or provide treatment. Encourage professional therapy. Use 80�?40 words. End with 1 concise question that helps the user continue.`;
 
   if (PROVIDER === 'groq') {
     if (!GROQ_API_KEY) return new NextResponse('Missing GROQ_API_KEY', { status: 500 });
