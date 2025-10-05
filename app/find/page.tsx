@@ -43,13 +43,41 @@ export default function FindPage() {
   };
 
   const copyOutreach = () => {
-    const body = lang==='zh'
-      ? `浣犲ソ锛孿n\n鎴戞鍦ㄥ鎵惧績鐞嗘不鐤楋紝浣犵殑璧勬枡鐪嬭捣鏉ュ彲鑳芥瘮杈冨尮閰嶃€備互涓嬫槸鏉ヨ嚜 Credibot锛堜竴涓不鐤楀噯澶囧伐鍏凤級鐨勭畝瑕佷俊鎭細\n- 鎵€鍦ㄥ湴锛?{city || "(浣犵殑鍩庡競)"}\n- 浼氳皥鍋忓ソ锛?{telehealth ? "杩滅▼" : "闈㈣皥"}\n- 淇濋櫓锛?{insurance || "鑷垂 / 寰呭畾"}\n- 棰勭畻锛?{maxFee ? `涓嶈秴杩?$${maxFee}` : "寮规€?}\n- 鍙兘鍋忓ソ鐨勫彇鍚戯細${modalities.join(", ") || "寰呭畾"}\n- 鍏虫敞棰嗗煙锛?{specialties.join(", ") || "寰呭畾"}\n- 璇█锛?{language || "涓枃/鑻辫"}\n\n濡傛灉浣犳鍦ㄦ帴鏀舵柊鏉ヨ鑰咃紝鑳藉惁鍛婄煡鍒濇鍜ㄨ鐨勫彲棰勭害鏃堕棿鍜岄€氬父璐圭敤锛焅n\n璋㈣阿锛乣
-      : `Hello,\n\nI鈥檓 exploring therapy and your profile looks like a potential fit. A quick snapshot about me from Credibot (a therapy-prep tool):\n- Location: ${city || "(your city)"}\n- Session preference: ${telehealth ? "Telehealth" : "In-person"}\n- Insurance: ${insurance || "Self-pay / TBD"}\n- Budget: ${maxFee ? `Up to $${maxFee}` : "Flexible"}\n- Modalities I think I might like: ${modalities.join(", ") || "TBD"}\n- Focus areas: ${specialties.join(", ") || "TBD"}\n- Language: ${language || "English"}\n\nIf you鈥檙e taking new clients, could you share openings for an initial consultation and typical fees?\n\nThank you!`;
-    navigator.clipboard.writeText(body);
-    alert(lang==='zh' ? '宸插鍒惰仈缁滈偖浠躲€? : 'Outreach note copied to clipboard.');
-  };
+    const body =
+      lang === 'zh'
+        ? `你好，
 
+  我正在寻找心理治疗，你的资料看起来可能比较匹配。以下是来自 Credibot（一个治疗准备工具）的简要信息：
+  - 所在地：${city || "(你的城市)"}
+  - 会谈偏好：${telehealth ? "远程" : "面谈"}
+  - 保险：${insurance || "自费 / 待定"}
+  - 预算：${maxFee ? `不超过 $${maxFee}` : "弹性"}
+  - 可能偏好的取向：${modalities.join(", ") || "待定"}
+  - 关注领域：${specialties.join(", ") || "待定"}
+  - 语言：${language || "中文/英语"}
+
+  如果你正在接收新来访者，能否告知初次咨询的可预约时间和通常费用？
+
+  谢谢！`
+        : `Hello,
+
+  I’m exploring therapy and your profile looks like a potential fit. A quick snapshot about me from Credibot (a therapy-prep tool):
+  - Location: ${city || "(your city)"}
+  - Session preference: ${telehealth ? "Telehealth" : "In-person"}
+  - Insurance: ${insurance || "Self-pay / TBD"}
+  - Budget: ${maxFee ? `Up to $${maxFee}` : "Flexible"}
+  - Modalities I think I might like: ${modalities.join(", ") || "TBD"}
+  - Focus areas: ${specialties.join(", ") || "TBD"}
+  - Language: ${language || "English"}
+
+  If you’re taking new clients, could you share openings for an initial consultation and typical fees?
+
+  Thank you!`;
+
+    navigator.clipboard.writeText(body);
+    alert(lang === 'zh' ? '已复制联络邮件。' : 'Outreach note copied to clipboard.');
+  };
+  
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white text-slate-900">
       <header className="sticky top-0 z-10 backdrop-blur bg-white/70 border-b border-slate-200">
